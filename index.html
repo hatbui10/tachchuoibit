@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Cắt Bit Tùy Chỉnh</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#1e1e2f;
+    color:white;
+    padding:20px;
+}
+input, button{
+    margin:10px 0;
+}
+pre{
+    background:#2c2c44;
+    padding:15px;
+    white-space:pre-wrap;
+    max-height:300px;
+    overflow:auto;
+}
+</style>
+</head>
+<body>
+
+<h2>Tải file và cắt bit tùy chỉnh</h2>
+
+<label>Số bit mỗi hàng:</label>
+<input type="number" id="bitLength" value="5" min="1">
+
+<br>
+
+<input type="file" id="fileInput" accept=".txt">
+
+<br>
+<button onclick="processFile()">Xử lý</button>
+<button onclick="downloadFile()">Xuất TXT</button>
+
+<h3>Kết quả:</h3>
+<pre id="output"></pre>
+
+<script>
+let formattedText = "";
+
+function processFile(){
+    const file = document.getElementById("fileInput").files[0];
+    const bitLength = parseInt(document.getElementById("bitLength").value);
+
+    if(!file){
+        alert("Chưa chọn file.");
+        return;
+    }
+
+    if(!bitLength || bitLength <= 0){
+        alert("Số bit không hợp lệ.");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+        let content = e.target.result;
+
+        // giữ lại chỉ 0 và 1
+        content = content.replace(/[^01]/g, "");
+
+        // cắt cho đủ bội số bitLength
+        let trimLength = content.length - (content.length % bitLength);
+        content = content.substring(0, trimLength);
+
+        let lines = [];
+
+        for(let i=0; i<content.length; i+=bitLength){
+            let chunk = content.substring(i, i+bitLength);
+            lines.push(chunk.split("").join("-"));
+        }
+
+        formattedText = lines.join("\n");
+        document.getElementById("output").textContent = formattedText;
+    };
+
+    reader.readAsText(file);
+}
+
+function downloadFile(){
+    if(!formattedText){
+        alert("Chưa có dữ liệu để xuất.");
+        return;
+    }
+
+    let blob = new Blob([formattedText], {type:"text/plain"});
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "bit_column.txt";
+    a.click();
+}
+</script>
+
+</body>
+</html>
+
