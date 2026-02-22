@@ -108,6 +108,17 @@ h2, h3{
    
 }
 
+button:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+}
+
+.file-name{
+ margin: 1px auto;
+}
+
+
+
 </style>
 </head>
 
@@ -129,6 +140,7 @@ h2, h3{
 
 <input type="file" id="fileInput" hidden>
 <label for="fileInput" class="upload-btn">Chọn file TXT</label>
+<div id="fileName" class="file-name">Chưa chọn file</div>
 
 <button onclick="processFile()">Xử lý</button>
 <button onclick="downloadFile()">Xuất TXT</button>
@@ -148,8 +160,26 @@ h2, h3{
 <script>
 let formattedText = "";
 
+const fileInput = document.getElementById("fileInput");
+const fileNameDisplay = document.getElementById("fileName");
+const processBtn = document.querySelector("button[onclick='processFile()']");
+
+// ban đầu khóa nút xử lý
+processBtn.disabled = true;
+
+// khi chọn file
+fileInput.addEventListener("change", function(){
+    if(this.files.length > 0){
+        fileNameDisplay.textContent = this.files[0].name;
+        processBtn.disabled = false;
+    } else {
+        fileNameDisplay.textContent = "Chưa chọn file";
+        processBtn.disabled = true;
+    }
+});
+
 function processFile(){
-    const file = document.getElementById("fileInput").files[0];
+    const file = fileInput.files[0];
     const bitLength = parseInt(document.getElementById("bitLength").value);
 
     if(!file){
@@ -167,10 +197,8 @@ function processFile(){
     reader.onload = function(e){
         let content = e.target.result;
 
-        // giữ lại chỉ 0 và 1
         content = content.replace(/[^01]/g, "");
 
-        // cắt cho đủ bội số bitLength
         let trimLength = content.length - (content.length % bitLength);
         content = content.substring(0, trimLength);
 
@@ -201,6 +229,9 @@ function downloadFile(){
     a.click();
 }
 </script>
+
+
+
 
 </body>
 </html>
